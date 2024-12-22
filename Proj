@@ -1,0 +1,475 @@
+import java.util.Scanner;
+
+public class App {
+    public static void main(String[] args) {
+        int tamMax = 100;
+        String[] tarefa = new String[tamMax];
+        boolean[] temPrazo = new boolean[tamMax];
+        boolean[] foiFeita = new boolean[tamMax];
+        int[][] data = new int[tamMax][3]; 
+        int nTarefas = 0;
+
+        Scanner scanner = new Scanner(System.in);
+        char opcao;
+
+        do {
+            System.out.println("\nMenu Principal:");
+            System.out.println("1. Visualizar (1)");
+            System.out.println("2. Marcar (2)");
+            System.out.println("3. Editar Tarefa (3)");
+            System.out.println("4. Sair (0)");
+            System.out.print("Escolha uma opção: ");
+            opcao = scanner.next().charAt(0);
+
+            switch (opcao) {
+                case '1':
+                    menuVisualizar(tarefa, temPrazo, foiFeita, data, nTarefas, scanner);
+                    break;
+                case '2':
+                    menuMarcar(tarefa, temPrazo, foiFeita, data, nTarefas, scanner);
+                    break;
+                case '3':
+                    editarTarefa(tarefa, temPrazo, foiFeita, data, nTarefas, scanner);
+                    break;
+                case '0':
+                    System.out.println("Saiu do programa. Até logo!");
+                    break;
+                default:
+                    System.out.println("Opção inválida. Tente novamente.");
+            }
+        } while (opcao != '0');
+
+        scanner.close();
+    }
+
+    // Menu Visualizar
+    public static void menuVisualizar(String[] tarefa, boolean[] temPrazo, boolean[] foiFeita, int[][] data, int nTarefas, Scanner scanner) {
+        char opcao;
+
+        do {
+            System.out.println("\nMenu Visualizar:");
+            System.out.println("1. Visualizar Todas (1)");
+            System.out.println("2. Visualizar Dia d (2)");
+            System.out.println("3. Visualizar Até dia d (3)");
+            System.out.println("4. Visualizar Por fazer (4)");
+            System.out.println("5. Visualizar Feitas (5)");
+            System.out.println("6. Visualizar por Palavra p (6)");
+            System.out.println("Voltar ao Menu Anterior (v)");
+            System.out.print("Escolha uma opção: ");
+            opcao = scanner.next().charAt(0);
+
+            switch (opcao) {
+                case '1':
+                    visualizarTarefas(tarefa, temPrazo, foiFeita, data, nTarefas);
+                    break;
+                case '2':
+                    visualizarPorDia(tarefa, temPrazo, foiFeita, data, nTarefas, scanner);
+                    break;
+                case '3':
+                    visualizarAteDia(tarefa, temPrazo, foiFeita, data, nTarefas, scanner);
+                    break;
+                case '4':
+                    visualizarPendentes(tarefa, temPrazo, foiFeita, nTarefas);
+                    break;
+                case '5':
+                    visualizarRealizadas(tarefa, foiFeita, nTarefas);
+                    break;
+                case '6':
+                    visualizarPorPalavra(tarefa, foiFeita, nTarefas, scanner);
+                    break;
+                case 'v':
+                    System.out.println("A Voltar ao menu principal.");
+                    break;
+                default:
+                    System.out.println("Opção inválida. Tente novamente.");
+            }
+        } while (opcao != 'v');
+    }
+
+    // Visualizar todas as tarefas
+    public static void visualizarTarefas(String[] tarefa, boolean[] temPrazo, boolean[] foiFeita, int[][] data, int nTarefas) {
+        System.out.println("Lista de tarefas:");
+        for (int i = 0; i < nTarefas; i++) {
+            String prazo = temPrazo[i] ? " (Prazo: " + data[i][0] + "/" + data[i][1] + "/" + data[i][2] + ")" : " (Sem prazo)";
+            String status = foiFeita[i] ? " (Feita)" : " (Por fazer)";
+            System.out.println((i + 1) + ": " + tarefa[i] + prazo + status);
+        }
+    }
+
+    // Visualizar tarefas por dia
+    public static void visualizarPorDia(String[] tarefa, boolean[] temPrazo, boolean[] foiFeita, int[][] data, int nTarefas, Scanner scanner) {
+        System.out.println("Insira a data (DD MM AAAA):");
+        int dia = scanner.nextInt();
+        int mes = scanner.nextInt();
+        int ano = scanner.nextInt();
+
+        System.out.println("Tarefas para o dia " + dia + "/" + mes + "/" + ano + ":");
+        for (int i = 0; i < nTarefas; i++) {
+            if (temPrazo[i] && data[i][0] == dia && data[i][1] == mes && data[i][2] == ano) {
+                System.out.println((i + 1) + ": " + tarefa[i] + (foiFeita[i] ? " (Feita)" : " (Por fazer)"));
+            }
+        }
+    }
+
+    // Visualizar tarefas até um dia
+    public static void visualizarAteDia(String[] tarefa, boolean[] temPrazo, boolean[] foiFeita, int[][] data, int nTarefas, Scanner scanner) {
+        System.out.println("Insira a data limite (DD MM AAAA):");
+        int dia = scanner.nextInt();
+        int mes = scanner.nextInt();
+        int ano = scanner.nextInt();
+
+        System.out.println("Tarefas até " + dia + "/" + mes + "/" + ano + ":");
+        for (int i = 0; i < nTarefas; i++) {
+            if (temPrazo[i] && (data[i][2] < ano || (data[i][2] == ano && (data[i][1] < mes || (data[i][1] == mes && data[i][0] <= dia))))) {
+                System.out.println((i + 1) + ": " + tarefa[i] + (foiFeita[i] ? " (Feita)" : " (Por fazer)"));
+            }
+        }
+    }
+
+    // Visualizar tarefas pendentes
+    public static void visualizarPendentes(String[] tarefa, boolean[] temPrazo, boolean[] foiFeita, int nTarefas) {
+        System.out.println("Tarefas pendentes:");
+        for (int i = 0; i < nTarefas; i++) {
+            if (!foiFeita[i]) {
+                System.out.println((i + 1) + ": " + tarefa[i]);
+            }
+        }
+    }
+
+    // Visualizar tarefas realizadas
+    public static void visualizarRealizadas(String[] tarefa, boolean[] foiFeita, int nTarefas) {
+        System.out.println("Tarefas realizadas:");
+        for (int i = 0; i < nTarefas; i++) {
+            if (foiFeita[i]) {
+                System.out.println((i + 1) + ": " + tarefa[i]);
+            }
+        }
+    }
+
+    // Visualizar tarefas por palavra
+    public static void visualizarPorPalavra(String[] tarefa, boolean[] foiFeita, int nTarefas, Scanner scanner) {
+        System.out.println("Escreva a palavra:");
+        scanner.nextLine(); // Limpar buffer
+        String palavra = scanner.nextLine();
+
+        System.out.println("Tarefas contendo \"" + palavra + "\":");
+        for (int i = 0; i < nTarefas; i++) {
+            if (tarefa[i].contains(palavra)) {
+                System.out.println((i + 1) + ": " + tarefa[i] + (foiFeita[i] ? " (Feita)" : " (Por fazer)"));
+            }
+        }
+    }
+
+    // Menu Marcar
+    public static void menuMarcar(String[] tarefa, boolean[] temPrazo, boolean[] foiFeita, int[][] data, int nTarefas, Scanner scanner) {
+        char opcao;
+
+        do {
+            System.out.println("\nMenu Marcar:");
+            System.out.println("1. Marcar como Feita por número (1)");
+            System.out.println("2. Marcar como feita por Texto (2)");
+            System.out.println("3. Desmarcar última feita (3)"); 
+            System.out.println("4. Marcar todas no dia d (4)");
+            System.out.println("Voltar (v)");
+            System.out.print("Escolha uma opção: ");
+            opcao = scanner.next().charAt(0);
+
+            switch (opcao) {
+                case '1':
+                    marcarTarefaPorNumero(tarefa, foiFeita, nTarefas, scanner);
+                    break;
+                case '2':
+                    marcarTarefaPorTexto(tarefa, foiFeita, nTarefas, scanner);
+                    break;
+                case '3':
+                    desmarcarUltimaFeita(tarefa, foiFeita, nTarefas);
+                    break;
+                case '4':
+                    marcarTodasNoDia(tarefa, temPrazo, foiFeita, data, nTarefas, scanner);
+                    break;
+                case 'v':
+                    System.out.println("A Voltar ao menu principal.");
+                    break;
+                default:
+                    System.out.println("Opção inválida. Tente novamente.");
+            }
+        } while (opcao != 'v');
+    }
+
+    // Marcar tarefa por número
+    public static void marcarTarefaPorNumero(String[] tarefa, boolean[] foiFeita, int nTarefas, Scanner scanner) {
+        System.out.println("Insira o número da tarefa:");
+        int index = scanner.nextInt() - 1;
+
+        if (index >= 0 && index < nTarefas) {
+            foiFeita[index] = true;
+            System.out.println("Tarefa \"" + tarefa[index] + "\" marcada como feita.");
+        } else {
+            System.out.println("Número inválido.");
+        }
+    }
+
+    // Marcar tarefa por texto
+    public static void marcarTarefaPorTexto(String[] tarefa, boolean[] foiFeita, int nTarefas, Scanner scanner) {
+        System.out.println("Escreva o texto:");
+        scanner.nextLine(); // Limpar buffer
+        String texto = scanner.nextLine();
+
+        for (int i = 0; i < nTarefas; i++) {
+            if (tarefa[i].contains(texto)) {
+                foiFeita[i] = true;
+                System.out.println("Tarefa \"" + tarefa[i] + "\" marcada como feita.");
+                return;
+            }
+        }
+        System.out.println("Nenhuma tarefa encontrada contendo \"" + texto + "\".");
+    }
+
+    // Desmarcar última tarefa feita
+    public static void desmarcarUltimaFeita(String[] tarefa, boolean[] foiFeita, int nTarefas) {
+        for (int i = nTarefas - 1; i >= 0; i--) {
+            if (foiFeita[i]) {
+                foiFeita[i] = false;
+                System.out.println("Tarefa \"" + tarefa[i] + "\" desmarcada.");
+                return;
+            }
+        }
+        System.out.println("Nenhuma tarefa feita encontrada.");
+    }
+
+    // Marcar todas no dia
+    public static void marcarTodasNoDia(String[] tarefa, boolean[] temPrazo, boolean[] foiFeita, int[][] data, int nTarefas, Scanner scanner) {
+        System.out.println("Insira a data (DD MM AAAA):");
+        int dia = scanner.nextInt();
+        int mes = scanner.nextInt();
+        int ano = scanner.nextInt();
+
+        for (int i = 0; i < nTarefas; i++) {
+            if (temPrazo[i] && data[i][0] == dia && data[i][1] == mes && data[i][2] == ano) {
+                foiFeita[i] = true;
+            }
+        }
+        System.out.println("Tarefas do dia " + dia + "/" + mes + "/" + ano + " foram marcadas como feitas.");
+    }
+
+    // Editar tarefa
+    public static void editarTarefa(String[] tarefa, boolean[] temPrazo, boolean[] foiFeita, int[][] data, int nTarefas, Scanner scanner) {
+        System.out.println("Insira o número da tarefa a editar:");
+        int index = scanner.nextInt() - 1;
+
+        if (index >= 0 && index < nTarefas) {
+            System.out.println("Tarefa atual: " + tarefa[index]);
+            System.out.println("Escreva a nova descrição:");
+            scanner.nextLine(); 
+            tarefa[index] = scanner.nextLine();
+
+            System.out.println("A tarefa tem prazo? (true/false):");
+            temPrazo[index] = scanner.nextBoolean();
+
+            if (temPrazo[index]) {
+                System.out.println("Insira a nova data (DD MM AAAA):");
+                data[index][0] = scanner.nextInt();
+                data[index][1] = scanner.nextInt();
+                data[index][2] = scanner.nextInt();
+            }
+
+            System.out.println("A tarefa foi feita? (true/false):");
+            foiFeita[index] = scanner.nextBoolean();
+
+            System.out.println("Tarefa editada com sucesso.");
+        } else {
+            System.out.println("Número de tarefa inválido.");
+        }
+    }
+
+    // Submenu Editar
+public static void menuEditar(String[] tarefa, boolean[] temPrazo, boolean[] foiFeita, int[][] data, int nTarefas, Scanner scanner) {
+    char opcao;
+
+    do {
+        System.out.println("\nMenu Editar:");
+        System.out.println("(A) Adicionar tarefa");
+        System.out.println("Adicionar (t)arefa na posição n");
+        System.out.println("Apagar tarefa na (p)osição n");
+        System.out.println("Apagar (f)eitas");
+        System.out.println("(J) Juntar tarefas");
+        System.out.println("(E) Editar tarefa");
+        System.out.println("(V) Voltar");
+        System.out.print("Escolha uma opção: ");
+        opcao = scanner.next().charAt(0);
+
+        switch (opcao) {
+            case 'A':
+                nTarefas = adicionarTarefa(tarefa, temPrazo, foiFeita, data, nTarefas, scanner);
+                break;
+            case 't':
+                nTarefas = adicionarTarefaNaPosicao(tarefa, temPrazo, foiFeita, data, nTarefas, scanner);
+                break;
+            case 'p':
+                nTarefas = apagarTarefaNaPosicao(tarefa, temPrazo, foiFeita, data, nTarefas, scanner);
+                break;
+            case 'f':
+                nTarefas = apagarTarefasFeitas(tarefa, temPrazo, foiFeita, data, nTarefas);
+                break;
+            case 'J':
+                nTarefas = juntarTarefas(tarefa, temPrazo, foiFeita, data, nTarefas, scanner);
+                break;
+            case 'E':
+                editarTarefa(tarefa, temPrazo, foiFeita, data, nTarefas, scanner);
+                break;
+            case 'V':
+                System.out.println("A Voltar ao menu principal.");
+                break;
+            default:
+                System.out.println("Opção inválida. Tente novamente.");
+        }
+    } while (opcao != 'V');
+}
+
+// Função para adicionar tarefa no final
+public static int adicionarTarefa(String[] tarefa, boolean[] temPrazo, boolean[] foiFeita, int[][] data, int nTarefas, Scanner scanner) {
+    if (nTarefas >= tarefa.length) {
+        System.out.println("Limite de tarefas atingido.");
+        return nTarefas;
+    }
+
+    System.out.println("Insira a descrição da nova tarefa:");
+    scanner.nextLine(); // Limpar buffer
+    tarefa[nTarefas] = scanner.nextLine();
+
+    System.out.println("A tarefa tem prazo? (true/false):");
+    temPrazo[nTarefas] = scanner.nextBoolean();
+
+    if (temPrazo[nTarefas]) {
+        System.out.println("Insira a data (DD MM AAAA):");
+        data[nTarefas][0] = scanner.nextInt();
+        data[nTarefas][1] = scanner.nextInt();
+        data[nTarefas][2] = scanner.nextInt();
+    }
+
+    foiFeita[nTarefas] = false;
+    nTarefas++;
+    System.out.println("Tarefa adicionada com sucesso.");
+    return nTarefas;
+}
+
+// Função para adicionar tarefa em uma posição específica
+public static int adicionarTarefaNaPosicao(String[] tarefa, boolean[] temPrazo, boolean[] foiFeita, int[][] data, int nTarefas, Scanner scanner) {
+    if (nTarefas >= tarefa.length) {
+        System.out.println("Limite de tarefas atingido.");
+        return nTarefas;
+    }
+
+    System.out.println("Insira a posição onde deseja adicionar a tarefa (1 a " + (nTarefas + 1) + "):");
+    int posicao = scanner.nextInt() - 1;
+
+    if (posicao < 0 || posicao > nTarefas) {
+        System.out.println("Posição inválida.");
+        return nTarefas;
+    }
+
+    // Movendo as tarefas para abrir espaço
+    for (int i = nTarefas; i > posicao; i--) {
+        tarefa[i] = tarefa[i - 1];
+        temPrazo[i] = temPrazo[i - 1];
+        foiFeita[i] = foiFeita[i - 1];
+        data[i][0] = data[i - 1][0];
+        data[i][1] = data[i - 1][1];
+        data[i][2] = data[i - 1][2];
+    }
+
+    // Adicionando nova tarefa
+    System.out.println("Insira a descrição da nova tarefa:");
+    scanner.nextLine(); // Limpar buffer
+    tarefa[posicao] = scanner.nextLine();
+
+    System.out.println("A tarefa tem prazo? (true/false):");
+    temPrazo[posicao] = scanner.nextBoolean();
+
+    if (temPrazo[posicao]) {
+        System.out.println("Insira a data (DD MM AAAA):");
+        data[posicao][0] = scanner.nextInt();
+        data[posicao][1] = scanner.nextInt();
+        data[posicao][2] = scanner.nextInt();
+    }
+
+    foiFeita[posicao] = false;
+    nTarefas++;
+    System.out.println("Tarefa adicionada com sucesso.");
+    return nTarefas;
+}
+
+// Função para apagar tarefa na posição especificada
+public static int apagarTarefaNaPosicao(String[] tarefa, boolean[] temPrazo, boolean[] foiFeita, int[][] data, int nTarefas, Scanner scanner) {
+    System.out.println("Insira a posição da tarefa a apagar (1 a " + nTarefas + "):");
+    int posicao = scanner.nextInt() - 1;
+
+    if (posicao < 0 || posicao >= nTarefas) {
+        System.out.println("Posição inválida.");
+        return nTarefas;
+    }
+
+    // Removendo a tarefa e reorganizando
+    for (int i = posicao; i < nTarefas - 1; i++) {
+        tarefa[i] = tarefa[i + 1];
+        temPrazo[i] = temPrazo[i + 1];
+        foiFeita[i] = foiFeita[i + 1];
+        data[i][0] = data[i + 1][0];
+        data[i][1] = data[i + 1][1];
+        data[i][2] = data[i + 1][2];
+    }
+    nTarefas--;
+    System.out.println("Tarefa apagada com sucesso.");
+    return nTarefas;
+}
+
+// Função para apagar tarefas feitas
+public static int apagarTarefasFeitas(String[] tarefa, boolean[] temPrazo, boolean[] foiFeita, int[][] data, int nTarefas) {
+    int novaQuantidade = 0;
+
+    for (int i = 0; i < nTarefas; i++) {
+        if (!foiFeita[i]) {
+            tarefa[novaQuantidade] = tarefa[i];
+            temPrazo[novaQuantidade] = temPrazo[i];
+            foiFeita[novaQuantidade] = foiFeita[i];
+            data[novaQuantidade][0] = data[i][0];
+            data[novaQuantidade][1] = data[i][1];
+            data[novaQuantidade][2] = data[i][2];
+            novaQuantidade++;
+        }
+    }
+    System.out.println("Tarefas feitas apagadas com sucesso.");
+    return novaQuantidade;
+}
+
+// Função para juntar tarefas
+public static int juntarTarefas(String[] tarefa, boolean[] temPrazo, boolean[] foiFeita, int[][] data, int nTarefas, Scanner scanner) {
+    System.out.println("Insira os números das tarefas a juntar:");
+    int t1 = scanner.nextInt() - 1;
+    int t2 = scanner.nextInt() - 1;
+
+    if (t1 < 0 || t1 >= nTarefas || t2 < 0 || t2 >= nTarefas || t1 == t2) {
+        System.out.println("Tarefas inválidas.");
+        return nTarefas;
+    }
+
+    // Criando nova descrição
+    tarefa[t1] = tarefa[t1] + ", " + tarefa[t2];
+    foiFeita[t1] = foiFeita[t1] && foiFeita[t2];
+
+    // Determinando a data mais próxima
+    if (temPrazo[t1] && temPrazo[t2]) {
+        if (data[t2][2] < data[t1][2] || 
+           (data[t2][2] == data[t1][2] && data[t2][1] < data[t1][1]) ||
+           (data[t2][2] == data[t1][2] && data[t2][1] == data[t1][1] && data[t2][0] < data[t1][0])) {
+            data[t1][0] = data[t2][0];
+            data[t1][1] = data[t2][1];
+            data[t1][2] = data[t2][2];
+        }
+    }
+
+    // Removendo a segunda tarefa
+    return apagarTarefaNaPosicao(tarefa, temPrazo, foiFeita, data, nTarefas, scanner);
+}
+
+}
